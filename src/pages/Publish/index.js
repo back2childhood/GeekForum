@@ -18,30 +18,24 @@ import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 import { useEffect, useState } from 'react'
 import { createArticleAPI, getChannelAPI } from '@/apis/article'
+import { useChannel } from '@/hooks/useChannel'
 
 const { Option } = Select
 
 const Publish = () => {
 
-    const [channelList, setChannelList] = useState([])
-
-    useEffect(() => {
-        const getChannelList = async () => {
-            const res = await getChannelAPI()
-            setChannelList(res.data.channels)
-        }
-        getChannelList()
-    }, [])
+    const { channelList } = useChannel()
 
     const onFinish = (formValue) => {
         console.log(formValue)
+        if (imageList.length !== imageType) return message.error('Number of pictures wrong')
         const { title, content, channel_id } = formValue
         const reqData = {
             title,
             content,
             cover: {
-                type: 0,
-                images: []
+                type: imageType,
+                images: imageList.map(item => item.response.data.url)
             },
             channel_id
         }
@@ -49,8 +43,10 @@ const Publish = () => {
         message.success("post sucess")
     }
 
-    const onChange = () => {
+    const [imageList, setImageList] = useState([])
+    const onChange = (value) => {
         console.log('uploading')
+        setImageList(value.fileList)
     }
 
     const [imageType, setImageType] = useState(0)
